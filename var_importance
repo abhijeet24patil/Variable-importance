@@ -1,0 +1,68 @@
+from numpy import*
+import random
+import time
+from operator import*
+from math import*
+import rf1
+d=5
+def bootstrapping(dataSet,q):      ##pass dataset and number of  bootstrap sample
+     sub=[]
+     cT=[]
+     bStrap,oob=bootstrap(dataSet,q)
+     return bStrap,oob
+
+## function for bootstrapping of dataset
+def bootstrap(dat,q):
+     l=len(dat)
+     bs=[]
+     bbs=[]
+     oob=[]
+     p=dat[0]
+     for x in range(q):
+          bs=sampl(dat)
+          bbs.append(bs)
+          ob=[]
+          for i in dat[1:]:
+            if i not in bs:
+                ob.append(i)
+          oob.append(ob)
+     for i in range(len(bbs)):
+          bbs[i].insert(0,p)
+
+     return bbs,oob
+
+def sampl(dat):
+     w=[]
+     l=len(dat)
+     for i in range(l-1):
+          oo=random.choice(dat[1:])
+          w.append(oo)
+          #ww=mat(w)
+     return w
+
+
+
+
+#----#----#------#------#
+
+
+dat=rf1.createDataSet('tictac.txt')
+l=dat[0]
+l2=l.copy()
+Bsamples,oob=bootstrapping(dat,b)             ## oob is out of bag samples, b is number of bootstrap samples
+rf=rf1.createTree(Bsamples[0],dat[0],d)       ## d is height of the tree
+
+v=[]
+for f in oob[0]:
+    f1=f[:-1]
+    f2=f[-1]
+    b=rf1.classify(rf,l2,f1)
+    if b==f2:
+        a='t'
+    else:a='f'
+    v.extend(a)
+tf=['t','f']
+t1=v.count('t')
+fa=v.count('f')
+print(t1/len(oob[0]))                          ## prints the accuracy on OOB samples
+
