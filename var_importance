@@ -50,19 +50,83 @@ dat=rf1.createDataSet('tictac.txt')
 l=dat[0]
 l2=l.copy()
 Bsamples,oob=bootstrapping(dat,b)             ## oob is out of bag samples, b is number of bootstrap samples
-rf=rf1.createTree(Bsamples[0],dat[0],d)       ## d is height of the tree
 
-v=[]
-for f in oob[0]:
-    f1=f[:-1]
-    f2=f[-1]
-    b=rf1.classify(rf,l2,f1)
-    if b==f2:
-        a='t'
-    else:a='f'
-    v.extend(a)
-tf=['t','f']
-t1=v.count('t')
-fa=v.count('f')
-print(t1/len(oob[0]))                          ## prints the accuracy on OOB samples
+rf=[]
+for b in range(B):
+    rf.append(rf1.createTree(Bsamples[b],Bsamples[b][0],4))
 
+
+
+l3=l2.copy()
+def avgRunner(rf,oob):
+    acuu=[]
+    for i in range(len(rf)):
+        v=[]
+        for item in oob[i]:
+            f1=item[:-1]
+            f2=item[-1]
+            b=rf1.vote(f1,rf,l2)
+            if b==f2:
+                a='t'
+            else:a='f'
+            v.extend(a)
+##    tf=['t','f']
+        t1=v.count('t')
+        fa=v.count('f')
+        acuu.append(t1/len(oob[i]))
+    return acuu
+
+ac=avgRunner(rf,oob)
+    ##print(t1/len(z1))
+
+def avgRunner1(rfs,b):
+    acuu=[]
+    v=[]
+    for item in b:
+        f1=item[:-1]
+        f2=item[-1]
+        b=rf1.classify(rfs,l2,f1)
+        if b==f2:
+            a='t'
+        else:a='f'
+        v.extend(a)
+
+    t1=v.count('t')
+    fa=v.count('f')
+    return t1/len(b)
+
+sAvg=[]
+for i in range(len(l3)-1):
+    acc=[]
+    for j in range(len(oob)):
+        m=mat(oob[j])
+        random.shuffle(m[:,i])
+        obj=m.tolist()
+        avg=avgRunner1(rf[j],obj)
+        acc.append(avg)
+
+    sAvg.append(acc)
+
+
+xxx=[]
+cc=0
+for i in range(len(sAvg)):
+	cc=subtract(ac,sAvg[i])
+	xl=[]
+
+	for j in cc:
+		t=linalg.norm(j)
+		xl.append(t)
+		s=sum(xl)
+		s=s/len(xl)
+	xxx.append(s)
+
+dic={}
+for i in range(len(xxx)):
+        dic[i]=xxx[i]
+sss=sorted(dic.items(),key=operator.itemgetter(1), reverse=True)
+sc=[]
+for i in range(len(sss)):
+    sc.append(sss[i][0])
+print(xxx)
+print('important variables with descending order of their importnace :\n',sc)
